@@ -29,7 +29,7 @@ public interface GNewsClient {
     SearchResponse searchArticles(@RequestParam String q,
                                   @RequestParam(required = false) Instant from,
                                   @RequestParam(required = false) Instant to,
-                                  @RequestParam(required = false) String max,
+                                  @RequestParam(required = false) Long max,
                                   @RequestParam(required = false) SortBy sortby,
                                   @RequestParam(required = false) Attributes in,
                                   @RequestParam String apikey);
