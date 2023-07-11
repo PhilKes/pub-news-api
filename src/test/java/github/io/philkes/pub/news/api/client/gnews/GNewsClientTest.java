@@ -1,9 +1,9 @@
 package github.io.philkes.pub.news.api.client.gnews;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import github.io.philkes.pub.news.api.TestUtils;
 import github.io.philkes.pub.news.api.client.gnews.dto.Article;
 import github.io.philkes.pub.news.api.client.gnews.dto.SearchResponse;
-import github.io.philkes.pub.news.api.client.gnews.dto.Source;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,9 +22,7 @@ import org.springframework.web.reactive.function.client.support.WebClientAdapter
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
@@ -71,21 +69,11 @@ class GNewsClientTest {
         mockServer.stop();
     }
 
-    private Article createArticle(int idx) {
-        return new Article(
-                "Title%d".formatted(idx),
-                "Description%d".formatted(idx),
-                "Content%d".formatted(idx),
-                "Url%d".formatted(idx),
-                "Image%d".formatted(idx),
-                Instant.now(),
-                new Source("Source%d".formatted(idx), "URI%d".formatted(idx))
-        );
-    }
+
 
     @Test
     void searchArticlesFound() throws IOException {
-        SearchResponse expected=new SearchResponse(1000L, IntStream.range(1, 10).mapToObj(this::createArticle).toList());
+        SearchResponse expected=TestUtils.createSearchResponse(1000L, 10);
         mockSearchResponse(objectMapper.writeValueAsString(expected));
         SearchResponse actual=gNewsClient.searchArticles("testquery", null, null, null, null, null, "test-apikey");
         assertEqualSearchResults(expected, actual);
