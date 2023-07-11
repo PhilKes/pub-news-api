@@ -1,10 +1,10 @@
 package github.io.philkes.pub.news.api.web;
 
 import github.io.philkes.pub.news.api.client.gnews.GNewsClient;
+import github.io.philkes.pub.news.api.client.gnews.GNewsClientProperties;
 import github.io.philkes.pub.news.api.client.gnews.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,12 +19,11 @@ public class NewsController {
 
     public static final String HEADER_TOTAL_ELEMENTS="total";
     private final GNewsClient gNewsClient;
+    private final GNewsClientProperties gNewsClientProperties;
 
-    @Value("${gnews.api.key}")
-    private String apiKey;
-
-    public NewsController(GNewsClient gNewsClient) {
+    public NewsController(GNewsClient gNewsClient, GNewsClientProperties gNewsClientProperties) {
         this.gNewsClient=gNewsClient;
+        this.gNewsClientProperties=gNewsClientProperties;
     }
 
     @Operation(description = "Search GNews articles")
@@ -44,7 +43,7 @@ public class NewsController {
                                                         @RequestParam(required = false) SortBy sortBy,
                                                         @Parameter(description = "Specify which attribute the keywords are searched for")
                                                         @RequestParam(required = false) Attribute in) {
-        SearchResponse searchResponse=gNewsClient.searchArticles(q, from, to, max, sortBy, in, apiKey);
+        SearchResponse searchResponse=gNewsClient.searchArticles(q, from, to, max, sortBy, in, gNewsClientProperties.apiKey);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .header(HEADER_TOTAL_ELEMENTS, String.valueOf(searchResponse.totalArticles()))
@@ -69,7 +68,7 @@ public class NewsController {
             @Parameter(description = "Specify maximum amount of returned articles")
             @RequestParam(required = false)
             Long max) {
-        SearchResponse searchResponse=gNewsClient.searchTopHeadlines(category, q, from, to, max, apiKey);
+        SearchResponse searchResponse=gNewsClient.searchTopHeadlines(category, q, from, to, max, gNewsClientProperties.apiKey);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .header(HEADER_TOTAL_ELEMENTS, String.valueOf(searchResponse.totalArticles()))

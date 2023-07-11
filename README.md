@@ -29,6 +29,7 @@ http://localhost:8080/swagger-ui/index.html
 
 # Environment Variables
 ```properties
+gnews.api.baseUrl=https://gnews.io/api/v4
 # API Key for the GNews API to fetch articles
 gnews.api.key=<api-key>
 ```

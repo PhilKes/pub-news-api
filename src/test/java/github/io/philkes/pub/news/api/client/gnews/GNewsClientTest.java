@@ -1,12 +1,14 @@
 package github.io.philkes.pub.news.api.client.gnews;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import github.io.philkes.pub.news.api.PubNewsApiApplication;
 import github.io.philkes.pub.news.api.TestUtils;
 import github.io.philkes.pub.news.api.client.gnews.dto.Article;
 import github.io.philkes.pub.news.api.client.gnews.dto.Category;
 import github.io.philkes.pub.news.api.client.gnews.dto.SearchResponse;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.configuration.Configuration;
@@ -15,15 +17,18 @@ import org.mockserver.model.MediaType;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cache.CacheManager;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.springframework.test.util.TestSocketUtils;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.support.WebClientAdapter;
-import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
@@ -32,37 +37,35 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
 @SpringBootTest
+@ContextConfiguration(
+        initializers = GNewsClientTest.PropertyOverrideContextInitializer.class,
+        classes = PubNewsApiApplication.class)
 class GNewsClientTest {
 
     private static final String SERVER_ADDRESS="localhost";
 
-    private static int serverPort;
+    private static int serverPort=TestSocketUtils.findAvailableTcpPort();
     private static ClientAndServer mockServer;
+
 
     @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
-    WebClient.Builder webClientBuilder;
-
     private GNewsClient gNewsClient;
 
-    @BeforeEach
-    void startServer() {
-        serverPort=TestSocketUtils.findAvailableTcpPort();
-        String serviceUrl="http://" + SERVER_ADDRESS + ":" + serverPort;
+    @Autowired
+    private CacheManager cacheManager;
 
+    @BeforeAll
+    static void startServer() {
         Configuration config=Configuration.configuration().logLevel(Level.WARN);
         mockServer=startClientAndServer(config, serverPort);
+    }
 
-        WebClient webClient=webClientBuilder
-                .baseUrl(serviceUrl)
-                .build();
-        HttpServiceProxyFactory httpServiceProxyFactory=HttpServiceProxyFactory
-                .builder(WebClientAdapter.forClient(webClient))
-                .build();
-        gNewsClient=httpServiceProxyFactory.createClient(GNewsClient.class);
-
+    @AfterEach
+    void clearCache() {
+        cacheManager.getCacheNames().forEach(cacheName -> Objects.requireNonNull(cacheManager.getCache(cacheName)).clear());
     }
 
     @AfterAll
@@ -83,8 +86,18 @@ class GNewsClientTest {
     void searchArticlesEmpty() throws IOException {
         SearchResponse expected=new SearchResponse(0L, List.of());
         mockSearchResponse("/search", objectMapper.writeValueAsString(expected));
-        SearchResponse actual=gNewsClient.searchArticles("testquery", null, null, null, null, null,"test-apikey");
+        SearchResponse actual=gNewsClient.searchArticles("testquery", null, null, null, null, null, "test-apikey");
         assertEqualSearchResults(expected, actual);
+    }
+
+    @Test
+    void searchArticlesCaching() throws IOException {
+        SearchResponse expected=TestUtils.createSearchResponse(1000L, 10);
+        mockSearchResponse("/search", objectMapper.writeValueAsString(expected));
+        for(int i=0; i<5; i++) {
+            SearchResponse actual=gNewsClient.searchArticles("testquery", null, null, null, null, null, "test-apikey");
+            assertEqualSearchResults(expected, actual);
+        }
     }
 
     @Test
@@ -126,4 +139,14 @@ class GNewsClientTest {
 
     }
 
+    public static class PropertyOverrideContextInitializer
+            implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+
+        @Override
+        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+            TestPropertySourceUtils.addInlinedPropertiesToEnvironment(
+                    configurableApplicationContext, "gnews.api.baseUrl=http://localhost:" + serverPort);
+        }
+    }
 }

@@ -4,10 +4,14 @@ import github.io.philkes.pub.news.api.client.gnews.dto.Attribute;
 import github.io.philkes.pub.news.api.client.gnews.dto.Category;
 import github.io.philkes.pub.news.api.client.gnews.dto.SearchResponse;
 import github.io.philkes.pub.news.api.client.gnews.dto.SortBy;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
 
 import java.time.Instant;
+
+import static github.io.philkes.pub.news.api.PubNewsApiApplication.CACHE_ARTICLES;
+import static github.io.philkes.pub.news.api.PubNewsApiApplication.CACHE_TOP_HEADLINES;
 
 /**
  * HTTP Client for accessing GNews API to fetch news articles
@@ -26,6 +30,7 @@ public interface GNewsClient {
      * @return Entire amount of found articles and the article objects
      */
     @GetExchange("/search")
+    @Cacheable(CACHE_ARTICLES)
     SearchResponse searchArticles(@RequestParam String q,
                                   @RequestParam(required = false) Instant from,
                                   @RequestParam(required = false) Instant to,
@@ -47,6 +52,7 @@ public interface GNewsClient {
      * @return Entire amount of found articles and the article objects
      */
     @GetExchange("/top-headlines")
+    @Cacheable(CACHE_TOP_HEADLINES)
     SearchResponse searchTopHeadlines(@RequestParam(required = false) Category category,
                                       @RequestParam(required = false) String q,
                                       @RequestParam(required = false) Instant from,
