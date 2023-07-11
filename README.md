@@ -17,3 +17,9 @@ Public news api for fetching News articles
 ```shell
 java -jar .\target\pub-news-api-0.0.1-SNAPSHOT.jar
 ```
+
+# Environment Variables
+```properties
+# API Key for the GNews API to fetch articles
+gnews.api.key=<api-key>
+```

@@ -1,6 +1,6 @@
 package github.io.philkes.pub.news.api.client.gnews;
 
-import github.io.philkes.pub.news.api.client.gnews.dto.Attributes;
+import github.io.philkes.pub.news.api.client.gnews.dto.Attribute;
 import github.io.philkes.pub.news.api.client.gnews.dto.Category;
 import github.io.philkes.pub.news.api.client.gnews.dto.SearchResponse;
 import github.io.philkes.pub.news.api.client.gnews.dto.SortBy;
@@ -23,7 +23,6 @@ public interface GNewsClient {
      * @param max specifies how many articles should be returned at maximum
      * @param sortby specifies which attribute the articles should be sorted by
      * @param in specifies which attribute the keywords are searched for
-     * @param apikey necessary to access the GNews API
      * @return Entire amount of found articles and the article objects
      */
     @GetExchange("/search")
@@ -32,8 +31,7 @@ public interface GNewsClient {
                                   @RequestParam(required = false) Instant to,
                                   @RequestParam(required = false) Long max,
                                   @RequestParam(required = false) SortBy sortby,
-                                  @RequestParam(required = false) Attributes in,
-                                  @RequestParam String apikey);
+                                  @RequestParam(required = false) Attribute in);
 
     /**
      * Search top-headlines articles.
@@ -51,8 +49,7 @@ public interface GNewsClient {
                                       @RequestParam(required = false) String q,
                                       @RequestParam(required = false) Instant from,
                                       @RequestParam(required = false) Instant to,
-                                      @RequestParam(required = false) Long max,
-                                      @RequestParam String apiKey);
+                                      @RequestParam(required = false) Long max);
 
 
 }

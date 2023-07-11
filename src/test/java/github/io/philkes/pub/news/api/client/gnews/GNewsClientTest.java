@@ -75,7 +75,7 @@ class GNewsClientTest {
     void searchArticlesFound() throws IOException {
         SearchResponse expected=TestUtils.createSearchResponse(1000L, 10);
         mockSearchResponse("/search", objectMapper.writeValueAsString(expected));
-        SearchResponse actual=gNewsClient.searchArticles("testquery", null, null, null, null, null, "test-apikey");
+        SearchResponse actual=gNewsClient.searchArticles("testquery", null, null, null, null, null);
         assertEqualSearchResults(expected, actual);
     }
 
@@ -83,45 +83,32 @@ class GNewsClientTest {
     void searchArticlesEmpty() throws IOException {
         SearchResponse expected=new SearchResponse(0L, List.of());
         mockSearchResponse("/search", objectMapper.writeValueAsString(expected));
-        SearchResponse actual=gNewsClient.searchArticles("testquery", null, null, null, null, null, "test-apikey");
+        SearchResponse actual=gNewsClient.searchArticles("testquery", null, null, null, null, null);
         assertEqualSearchResults(expected, actual);
     }
 
     @Test
     void searchArticlesRequiredParameters() {
         IllegalArgumentException exception=assertThrows(IllegalArgumentException.class, () -> {
-            gNewsClient.searchArticles(null, null, null, null, null, null, "test-apikey");
+            gNewsClient.searchArticles(null, null, null, null, null, null);
         });
         assertTrue(exception.getMessage().contains("'q'"));
-        exception=assertThrows(IllegalArgumentException.class, () -> {
-            gNewsClient.searchArticles("test-query", null, null, null, null, null, null);
-        });
-        assertTrue(exception.getMessage().contains("'apikey'"));
     }
 
     @Test
     void searchTopHeadlinesFound() throws IOException {
         SearchResponse expected=TestUtils.createSearchResponse(1000L, 10);
-        mockSearchResponse("/top-headlines",objectMapper.writeValueAsString(expected));
-        SearchResponse actual=gNewsClient.searchTopHeadlines(Category.GENERAL, null, null, null, null, "test-apikey");
+        mockSearchResponse("/top-headlines", objectMapper.writeValueAsString(expected));
+        SearchResponse actual=gNewsClient.searchTopHeadlines(Category.GENERAL, null, null, null, null);
         assertEqualSearchResults(expected, actual);
     }
 
     @Test
     void searchTopHeadlinesEmpty() throws IOException {
         SearchResponse expected=new SearchResponse(0L, List.of());
-        mockSearchResponse("/top-headlines",objectMapper.writeValueAsString(expected));
-        SearchResponse actual=gNewsClient.searchTopHeadlines(Category.GENERAL, null, null, null, null, "test-apikey");
+        mockSearchResponse("/top-headlines", objectMapper.writeValueAsString(expected));
+        SearchResponse actual=gNewsClient.searchTopHeadlines(Category.GENERAL, null, null, null, null);
         assertEqualSearchResults(expected, actual);
-    }
-
-    @Test
-    void searchTopHeadlinesRequiredParameters() {
-        IllegalArgumentException exception=assertThrows(IllegalArgumentException.class, () -> {
-           gNewsClient.searchTopHeadlines(Category.GENERAL, null, null, null, null, null);
-        });
-        assertTrue(exception.getMessage().contains("'apiKey'"));
-
     }
 
     private void assertEqualSearchResults(SearchResponse expected, SearchResponse actual) {
