@@ -27,9 +27,8 @@ public class NewsController {
                                                         @RequestParam(required = false) Instant to,
                                                         @RequestParam(required = false) Long max,
                                                         @RequestParam(required = false) SortBy sortBy,
-                                                        @RequestParam(required = false) Attributes in,
-                                                        @RequestParam String apiKey) {
-        SearchResponse searchResponse=gNewsClient.searchArticles(q, from, to, max, sortBy, in, apiKey);
+                                                        @RequestParam(required = false) Attribute in) {
+        SearchResponse searchResponse=gNewsClient.searchArticles(q, from, to, max, sortBy, in);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .header(HEADER_TOTAL_ELEMENTS, String.valueOf(searchResponse.totalArticles()))
@@ -41,9 +40,8 @@ public class NewsController {
                                                             @RequestParam(required = false) String q,
                                                             @RequestParam(required = false) Instant from,
                                                             @RequestParam(required = false) Instant to,
-                                                            @RequestParam(required = false) Long max,
-                                                            @RequestParam String apiKey) {
-        SearchResponse searchResponse=gNewsClient.searchTopHeadlines(category, q, from, to, max, apiKey);
+                                                            @RequestParam(required = false) Long max) {
+        SearchResponse searchResponse=gNewsClient.searchTopHeadlines(category, q, from, to, max);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .header(HEADER_TOTAL_ELEMENTS, String.valueOf(searchResponse.totalArticles()))

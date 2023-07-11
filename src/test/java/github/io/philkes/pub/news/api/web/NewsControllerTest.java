@@ -40,7 +40,7 @@ public class NewsControllerTest {
     @Test
     void searchArticles200Ok() throws Exception {
         SearchResponse expected=TestUtils.createSearchResponse(100L, 10);
-        Mockito.when(gNewsClient.searchArticles(anyString(), any(), any(), any(), any(), any(), any()))
+        Mockito.when(gNewsClient.searchArticles(anyString(), any(), any(), any(), any(), any()))
                 .thenReturn(expected);
         mockMvc.perform(get(API_PATH_SEARCH)
                         .queryParam("q", "test-query")
@@ -61,7 +61,7 @@ public class NewsControllerTest {
     @Test
     void searchArticles400BadRequest() throws Exception {
         SearchResponse expected=TestUtils.createSearchResponse(100L, 10);
-        Mockito.when(gNewsClient.searchArticles(anyString(), any(), any(), any(), any(), any(), any()))
+        Mockito.when(gNewsClient.searchArticles(anyString(), any(), any(), any(), any(), any()))
                 .thenReturn(expected);
         mockMvc.perform(get(API_PATH_SEARCH).queryParam("apiKey", "test-apikey"))
                 .andDo(print())
@@ -70,7 +70,7 @@ public class NewsControllerTest {
 
     @Test
     void searchArticles503ServiceUnavailable() throws Exception {
-        Mockito.when(gNewsClient.searchArticles(anyString(), any(), any(), any(), any(), any(), any()))
+        Mockito.when(gNewsClient.searchArticles(anyString(), any(), any(), any(), any(), any()))
                 .thenThrow(new WebClientResponseException(HttpStatus.GONE.value(), "Service gone", null, null, null));
         mockMvc.perform(get(API_PATH_SEARCH)
                         .queryParam("q", "test-query")
@@ -82,7 +82,7 @@ public class NewsControllerTest {
     @Test
     void searchTopHeadlines200Ok() throws Exception {
         SearchResponse expected=TestUtils.createSearchResponse(100L, 10);
-        Mockito.when(gNewsClient.searchTopHeadlines(any(), any(), any(), any(), any(), any()))
+        Mockito.when(gNewsClient.searchTopHeadlines(any(), any(), any(), any(), any()))
                 .thenReturn(expected);
         mockMvc.perform(get(API_PATH_TOP_HEADLINES)
                         .queryParam("category", "general")
@@ -102,16 +102,17 @@ public class NewsControllerTest {
     @Test
     void searchTopHeadlines400BadRequest() throws Exception {
         SearchResponse expected=TestUtils.createSearchResponse(100L, 10);
-        Mockito.when(gNewsClient.searchTopHeadlines(any(), any(), any(), any(), any(), any()))
+        Mockito.when(gNewsClient.searchTopHeadlines(any(), any(), any(), any(), any()))
                 .thenReturn(expected);
-        mockMvc.perform(get(API_PATH_TOP_HEADLINES))
+        mockMvc.perform(get(API_PATH_TOP_HEADLINES)
+                        .queryParam("category","non-existent"))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void searchTopHeadlines503ServiceUnavailable() throws Exception {
-        Mockito.when(gNewsClient.searchTopHeadlines(any(), any(), any(), any(), any(), any()))
+        Mockito.when(gNewsClient.searchTopHeadlines(any(), any(), any(), any(), any()))
                 .thenThrow(new WebClientResponseException(HttpStatus.GONE.value(), "Service gone", null, null, null));
         mockMvc.perform(get(API_PATH_TOP_HEADLINES)
                         .queryParam("category", "general")
