@@ -1,6 +1,7 @@
 package github.io.philkes.pub.news.api.client.gnews;
 
 import github.io.philkes.pub.news.api.client.gnews.dto.StringToAttributesConverter;
+import github.io.philkes.pub.news.api.client.gnews.dto.StringToCategoryConverter;
 import github.io.philkes.pub.news.api.client.gnews.dto.StringToSortByConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -35,5 +36,6 @@ public class GNewsClientAutoConfiguration implements WebMvcConfigurer {
     public void addFormatters(FormatterRegistry registry) {
         registry.addConverter(new StringToSortByConverter());
         registry.addConverter(new StringToAttributesConverter());
+        registry.addConverter(new StringToCategoryConverter());
     }
 }

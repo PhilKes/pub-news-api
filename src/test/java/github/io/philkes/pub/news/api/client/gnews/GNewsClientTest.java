@@ -3,6 +3,7 @@ package github.io.philkes.pub.news.api.client.gnews;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import github.io.philkes.pub.news.api.TestUtils;
 import github.io.philkes.pub.news.api.client.gnews.dto.Article;
+import github.io.philkes.pub.news.api.client.gnews.dto.Category;
 import github.io.philkes.pub.news.api.client.gnews.dto.SearchResponse;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -70,11 +71,10 @@ class GNewsClientTest {
     }
 
 
-
     @Test
     void searchArticlesFound() throws IOException {
         SearchResponse expected=TestUtils.createSearchResponse(1000L, 10);
-        mockSearchResponse(objectMapper.writeValueAsString(expected));
+        mockSearchResponse("/search", objectMapper.writeValueAsString(expected));
         SearchResponse actual=gNewsClient.searchArticles("testquery", null, null, null, null, null, "test-apikey");
         assertEqualSearchResults(expected, actual);
     }
@@ -82,7 +82,7 @@ class GNewsClientTest {
     @Test
     void searchArticlesEmpty() throws IOException {
         SearchResponse expected=new SearchResponse(0L, List.of());
-        mockSearchResponse(objectMapper.writeValueAsString(expected));
+        mockSearchResponse("/search", objectMapper.writeValueAsString(expected));
         SearchResponse actual=gNewsClient.searchArticles("testquery", null, null, null, null, null, "test-apikey");
         assertEqualSearchResults(expected, actual);
     }
@@ -99,6 +99,31 @@ class GNewsClientTest {
         assertTrue(exception.getMessage().contains("'apikey'"));
     }
 
+    @Test
+    void searchTopHeadlinesFound() throws IOException {
+        SearchResponse expected=TestUtils.createSearchResponse(1000L, 10);
+        mockSearchResponse("/top-headlines",objectMapper.writeValueAsString(expected));
+        SearchResponse actual=gNewsClient.searchTopHeadlines(Category.GENERAL, null, null, null, null, "test-apikey");
+        assertEqualSearchResults(expected, actual);
+    }
+
+    @Test
+    void searchTopHeadlinesEmpty() throws IOException {
+        SearchResponse expected=new SearchResponse(0L, List.of());
+        mockSearchResponse("/top-headlines",objectMapper.writeValueAsString(expected));
+        SearchResponse actual=gNewsClient.searchTopHeadlines(Category.GENERAL, null, null, null, null, "test-apikey");
+        assertEqualSearchResults(expected, actual);
+    }
+
+    @Test
+    void searchTopHeadlinesRequiredParameters() {
+        IllegalArgumentException exception=assertThrows(IllegalArgumentException.class, () -> {
+           gNewsClient.searchTopHeadlines(Category.GENERAL, null, null, null, null, null);
+        });
+        assertTrue(exception.getMessage().contains("'apiKey'"));
+
+    }
+
     private void assertEqualSearchResults(SearchResponse expected, SearchResponse actual) {
         assertEquals(expected.totalArticles(), actual.totalArticles());
         List<Article> expectedArticles=expected.articles();
@@ -106,9 +131,9 @@ class GNewsClientTest {
         assertEquals(expectedArticles.size(), resultArticles.size());
     }
 
-    private void mockSearchResponse(String jsonResponse) {
+    private void mockSearchResponse(String path, String jsonResponse) {
         new MockServerClient(SERVER_ADDRESS, serverPort)
-                .when(request().withPath("/search").withMethod(HttpMethod.GET.name()), exactly(1))
+                .when(request().withPath(path).withMethod(HttpMethod.GET.name()), exactly(1))
                 .respond(response().withStatusCode(HttpStatus.OK.value()).withContentType(MediaType.APPLICATION_JSON)
                         .withBody(jsonResponse));
 

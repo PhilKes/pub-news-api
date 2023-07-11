@@ -1,6 +1,7 @@
 package github.io.philkes.pub.news.api.client.gnews;
 
 import github.io.philkes.pub.news.api.client.gnews.dto.Attributes;
+import github.io.philkes.pub.news.api.client.gnews.dto.Category;
 import github.io.philkes.pub.news.api.client.gnews.dto.SearchResponse;
 import github.io.philkes.pub.news.api.client.gnews.dto.SortBy;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -33,6 +34,25 @@ public interface GNewsClient {
                                   @RequestParam(required = false) SortBy sortby,
                                   @RequestParam(required = false) Attributes in,
                                   @RequestParam String apikey);
+
+    /**
+     * Search top-headlines articles.
+     * For further details see <a href="https://gnews.io/docs/v4#top-headlines-endpoint">gnews.io/docs</a>
+     *
+     * @param category specifies the articles' categories that should be searched
+     * @param q search query for keywords search
+     * @param from only return articles which {@link  github.io.philkes.pub.news.api.client.gnews.dto.Article#publishedAt()} is equal or after the given Instant
+     * @param to only return articles which {@link  github.io.philkes.pub.news.api.client.gnews.dto.Article#publishedAt()} is equal or before the given Instant
+     * @param max specifies how many articles should be returned at maximum
+     * @return Entire amount of found articles and the article objects
+     */
+    @GetExchange("/top-headlines")
+    SearchResponse searchTopHeadlines(@RequestParam(required = false) Category category,
+                                      @RequestParam(required = false) String q,
+                                      @RequestParam(required = false) Instant from,
+                                      @RequestParam(required = false) Instant to,
+                                      @RequestParam(required = false) Long max,
+                                      @RequestParam String apiKey);
 
 
 }
