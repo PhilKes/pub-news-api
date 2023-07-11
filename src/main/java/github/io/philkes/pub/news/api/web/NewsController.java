@@ -1,10 +1,7 @@
 package github.io.philkes.pub.news.api.web;
 
 import github.io.philkes.pub.news.api.client.gnews.GNewsClient;
-import github.io.philkes.pub.news.api.client.gnews.dto.Article;
-import github.io.philkes.pub.news.api.client.gnews.dto.Attributes;
-import github.io.philkes.pub.news.api.client.gnews.dto.SearchResponse;
-import github.io.philkes.pub.news.api.client.gnews.dto.SortBy;
+import github.io.philkes.pub.news.api.client.gnews.dto.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +21,7 @@ public class NewsController {
         this.gNewsClient=gNewsClient;
     }
 
-    @GetMapping
+    @GetMapping("/search")
     public ResponseEntity<List<Article>> searchArticles(@RequestParam String q,
                                                         @RequestParam(required = false) Instant from,
                                                         @RequestParam(required = false) Instant to,
@@ -33,6 +30,20 @@ public class NewsController {
                                                         @RequestParam(required = false) Attributes in,
                                                         @RequestParam String apiKey) {
         SearchResponse searchResponse=gNewsClient.searchArticles(q, from, to, max, sortBy, in, apiKey);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .header(HEADER_TOTAL_ELEMENTS, String.valueOf(searchResponse.totalArticles()))
+                .body(searchResponse.articles());
+    }
+
+    @GetMapping("/top-headlines")
+    public ResponseEntity<List<Article>> searchTopHeadlines(@RequestParam(required = false) Category category,
+                                                            @RequestParam(required = false) String q,
+                                                            @RequestParam(required = false) Instant from,
+                                                            @RequestParam(required = false) Instant to,
+                                                            @RequestParam(required = false) Long max,
+                                                            @RequestParam String apiKey) {
+        SearchResponse searchResponse=gNewsClient.searchTopHeadlines(category, q, from, to, max, apiKey);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .header(HEADER_TOTAL_ELEMENTS, String.valueOf(searchResponse.totalArticles()))

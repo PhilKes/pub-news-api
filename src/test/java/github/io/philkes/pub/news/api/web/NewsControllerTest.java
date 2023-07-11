@@ -26,6 +26,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class NewsControllerTest {
 
+    public static final String API_PATH_SEARCH="/api/news/search";
+    public static final String API_PATH_TOP_HEADLINES="/api/news/top-headlines";
     @Autowired
     MockMvc mockMvc;
 
@@ -40,7 +42,7 @@ public class NewsControllerTest {
         SearchResponse expected=TestUtils.createSearchResponse(100L, 10);
         Mockito.when(gNewsClient.searchArticles(anyString(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(expected);
-        mockMvc.perform(get("/api/news")
+        mockMvc.perform(get(API_PATH_SEARCH)
                         .queryParam("q", "test-query")
                         .queryParam("from", "2022-07-11T13:43:38Z")
                         .queryParam("to", "2023-07-11T13:43:38Z")
@@ -61,7 +63,7 @@ public class NewsControllerTest {
         SearchResponse expected=TestUtils.createSearchResponse(100L, 10);
         Mockito.when(gNewsClient.searchArticles(anyString(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(expected);
-        mockMvc.perform(get("/api/news").queryParam("apiKey", "test-apikey"))
+        mockMvc.perform(get(API_PATH_SEARCH).queryParam("apiKey", "test-apikey"))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }
@@ -70,7 +72,49 @@ public class NewsControllerTest {
     void searchArticles503ServiceUnavailable() throws Exception {
         Mockito.when(gNewsClient.searchArticles(anyString(), any(), any(), any(), any(), any(), any()))
                 .thenThrow(new WebClientResponseException(HttpStatus.GONE.value(), "Service gone", null, null, null));
-        mockMvc.perform(get("/api/news")
+        mockMvc.perform(get(API_PATH_SEARCH)
+                        .queryParam("q", "test-query")
+                        .queryParam("apiKey", "test-apikey")
+                ).andDo(print())
+                .andExpect(status().is(HttpStatus.SERVICE_UNAVAILABLE.value()));
+    }
+
+    @Test
+    void searchTopHeadlines200Ok() throws Exception {
+        SearchResponse expected=TestUtils.createSearchResponse(100L, 10);
+        Mockito.when(gNewsClient.searchTopHeadlines(any(), any(), any(), any(), any(), any()))
+                .thenReturn(expected);
+        mockMvc.perform(get(API_PATH_TOP_HEADLINES)
+                        .queryParam("category", "general")
+                        .queryParam("q", "test-query")
+                        .queryParam("from", "2022-07-11T13:43:38Z")
+                        .queryParam("to", "2023-07-11T13:43:38Z")
+                        .queryParam("max", "10")
+                        .queryParam("apiKey", "test-apikey")
+
+                ).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(header().string(HEADER_TOTAL_ELEMENTS, "100"))
+                .andExpect(content().json(objectMapper.writeValueAsString(expected.articles())));
+    }
+
+    @Test
+    void searchTopHeadlines400BadRequest() throws Exception {
+        SearchResponse expected=TestUtils.createSearchResponse(100L, 10);
+        Mockito.when(gNewsClient.searchTopHeadlines(any(), any(), any(), any(), any(), any()))
+                .thenReturn(expected);
+        mockMvc.perform(get(API_PATH_TOP_HEADLINES))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void searchTopHeadlines503ServiceUnavailable() throws Exception {
+        Mockito.when(gNewsClient.searchTopHeadlines(any(), any(), any(), any(), any(), any()))
+                .thenThrow(new WebClientResponseException(HttpStatus.GONE.value(), "Service gone", null, null, null));
+        mockMvc.perform(get(API_PATH_TOP_HEADLINES)
+                        .queryParam("category", "general")
                         .queryParam("q", "test-query")
                         .queryParam("apiKey", "test-apikey")
                 ).andDo(print())
