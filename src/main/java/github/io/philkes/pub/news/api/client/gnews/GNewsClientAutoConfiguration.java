@@ -31,19 +31,10 @@ public class GNewsClientAutoConfiguration implements WebMvcConfigurer {
     @Value("${gnews.api.baseUrl:https://gnews.io/api/v4}")
     private String apiBaseUrl;
 
-    @Value("${gnews.api.key}")
-    private String apiKey;
-
     @Bean
     public GNewsClient gNewsClient(WebClient.Builder webClientBuilder) {
         WebClient webClient=webClientBuilder
                 .baseUrl(apiBaseUrl)
-                .uriBuilderFactory(new DefaultUriBuilderFactory(){
-                    @Override
-                    public UriBuilder builder() {
-                        return super.builder().queryParam("apikey", apiKey);
-                    }
-                })
                 .build();
         HttpServiceProxyFactory httpServiceProxyFactory=HttpServiceProxyFactory
                 .builder(WebClientAdapter.forClient(webClient))
