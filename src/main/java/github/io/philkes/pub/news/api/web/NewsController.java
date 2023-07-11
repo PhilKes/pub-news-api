@@ -5,6 +5,8 @@ import github.io.philkes.pub.news.api.client.gnews.GNewsClientProperties;
 import github.io.philkes.pub.news.api.client.gnews.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,13 +29,18 @@ public class NewsController {
     }
 
     @Operation(description = "Search GNews articles")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Articles found"),
+            @ApiResponse(responseCode = "503", description = "GNews API not available"),
+            @ApiResponse(responseCode = "400", description = "Bad Request")
+    })
     @GetMapping("/search")
     public ResponseEntity<List<Article>> searchArticles(@Parameter(description = "Keywords query", required = true)
                                                         @RequestParam String q,
                                                         @RequestParam(required = false)
-                                                        @Parameter(description = "Search articles that were published after this Instant")
+                                                        @Parameter(description = "Search articles that were published after this Instant", example = "2023-07-11T13:43:38Z")
                                                         Instant from,
-                                                        @Parameter(description = "Search articles that were published before this Instant")
+                                                        @Parameter(description = "Search articles that were published before this Instant", example = "2023-07-11T13:43:38Z")
                                                         @RequestParam(required = false)
                                                         Instant to,
                                                         @Parameter(description = "Specify maximum amount of returned articles")
@@ -51,6 +58,11 @@ public class NewsController {
     }
 
     @Operation(description = "Search GNews top-headlines")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Top-Headlines found"),
+            @ApiResponse(responseCode = "503", description = "GNews API not available"),
+            @ApiResponse(responseCode = "400", description = "Bad Request")
+    })
     @GetMapping("/top-headlines")
     public ResponseEntity<List<Article>> searchTopHeadlines(
             @Parameter(description = "Specify the article category to be searched")
@@ -59,10 +71,10 @@ public class NewsController {
             @Parameter(description = "Keywords query")
             @RequestParam(required = false)
             String q,
-            @Parameter(description = "Search articles that were published after this Instant")
+            @Parameter(description = "Search articles that were published after this Instant", example = "2023-07-11T13:43:38Z")
             @RequestParam(required = false)
             Instant from,
-            @Parameter(description = "Search articles that were published before this Instant")
+            @Parameter(description = "Search articles that were published before this Instant", example = "2023-07-11T13:43:38Z")
             @RequestParam(required = false)
             Instant to,
             @Parameter(description = "Specify maximum amount of returned articles")
